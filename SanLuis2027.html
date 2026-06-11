@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Mapa Interactivo – Trapiche & Río Grande</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- Leaflet -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<!-- Leaflet Routing Machine -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
+<script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
+
+<style>
+  #map { height: 100vh; }
+  body { margin: 0; }
+</style>
+</head>
+
+<body>
+<div id="map"></div>
+
+<script>
+// Punto central: Camping María Reina de la Paz
+const camping = {
+    name: "Camping María Reina de la Paz",
+    lat: -33.06839626888137,
+    lng: -66.07051051973609
+};
+
+// Inicializar mapa
+const map = L.map('map').setView([camping.lat, camping.lng], 12);
+
+// Capa base estilo Google Maps (Carto Voyager)
+L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '&copy; OpenStreetMap & Carto'
+}).addTo(map);
+
+// Marcador del camping
+L.marker([camping.lat, camping.lng], {title: camping.name})
+  .addTo(map)
+  .bindPopup("<b>" + camping.name + "</b><br>Punto de partida");
+
+// Lista de puntos
+const puntos = [
+  {nombre:"Balneario El Trapiche", lat:-33.10635319200231, lng:-66.0628643746922, km:8.4, link:"https://www.google.com/maps/place/Trapiche"},
+  {nombre:"Bomberos voluntarios", lat:-33.108186581503645, lng:-66.06322343210495, km:9.5, link:""},
+  {nombre:"Doña hilaria (las mejores tortas con chicharones del condado)", lat:-33.1101995090225, lng:-66.06318798228828, km:null, link:""},
+  {nombre:"Capilla Nuestra Señora del Rosario", lat:-33.11082172155275, lng:-66.06311898038489, km:9.9, link:"https://www.google.com/maps/place/Iglesia+Nuestra+Se%C3%B1ora+del+Rosario"},
+  {nombre:"Balneario Siete Cajones playa publica", lat:-33.07947697494723, lng:-66.05571267160879, km:10.2, link:"https://www.google.com/maps/place/Playa+P%C3%BAblica"},
+  {nombre:"Balneario Siete Cajones (No apto niños)", lat:-33.08159819207297, lng:-66.05458421965305, km:null, link:"https://www.google.com/maps/place/Siete+Cajones"},
+  {nombre:"Vertedero Dique Esteban Agüero", lat:-33.06257498312164, lng:-66.07469842699678, km:1.5, link:"https://www.google.com/maps/place/Vertedero+Dique+Antonio+Esteban+Aguero"},
+  {nombre:"Cascada Río Grande (abajo del vertedero)", lat:-33.06308156735388, lng:-66.074860820095, km:1.5, link:"https://www.google.com/maps/place/Cascada+De+R%C3%ADo+Grande"},
+  {nombre:"Mirador Esteban Agüero", lat:-33.06041673123704, lng:-66.08599860606324, km:3.5, link:"https://www.google.com/maps/place/Mirador+Esteban+Ag%C3%BCero"},
+  {nombre:"Mirador Cabeza de Cabra", lat:-33.060796307814165, lng:-66.09261579350525, km:5.2, link:"https://www.google.com/maps/place/Cabeza+de+cabra"},
+  {nombre:"Mirador Río Grande", lat:-33.05615746800638, lng:-66.09398729110701, km:6.4, link:"https://www.google.com/maps/place/Mirador+de+R%C3%ADo+Grande"},
+  {nombre:"La Carolina", lat:-32.81364196893903, lng:-66.09457405422614, km:36.7, link:""},
+  {nombre:"Gruta de Hinti Huasi", lat:-32.83515437698541, lng:-65.96234022306625, km:57, link:""},
+  {nombre:"Cerro Tomolasta", lat:-32.81079728651353, lng:-66.0763529604508, km:null, link:""},
+  {nombre:"Paseo del pirquinero", lat:-32.8082361659996, lng:-66.0877930782468, km:null, link:""},
+  {nombre:"Laberinto de las Piedras", lat:-32.80443119097798, lng:-66.08626187188894, km:null, link:"https://www.google.com/search?q=que+hacer+en+la+carolina+san+luis"},
+  {nombre:"Mina de Oro La Carolina", lat:-32.804452689848965, lng:-66.08546288915817, km:null, link:""},
+  {nombre:"Mirador La Carolina", lat:-32.80859344108463, lng:-66.08758860548981, km:null, link:""},
+  {nombre:"Mirador El Trapiche", lat:-33.11368572901561, lng:-66.05838241082726, km:10.7, link:"https://www.google.com/maps/place/MIRADOR+TRAPICHE"},
+  {nombre:"Mirador El Minero", lat:-33.11633420967591, lng:-66.06313524279226, km:10.7, link:"https://www.google.com/maps/place/Mirador+Del+Minero"},
+  {nombre:"Mirador Embalse La Florida (tirolesa)", lat:-33.119749617609024, lng:-66.06001368674369, km:10.9, link:"https://www.google.com/maps/place/SUPER+TIROLESA"},
+  {nombre:"Mirador San Expedito", lat:-33.107350557113456, lng:-66.00593576155826, km:17.5, link:"https://www.google.com/maps/place/Mirador+San+Expedito"},
+  {nombre:"Murallón La Florida", lat:-33.11322446360478, lng:-66.00262218605904, km:18.3, link:"https://www.google.com/maps/place/Dique+La+Florida"},
+  {nombre:"Estación Piscicultura La Florida", lat:-33.11873699257484, lng:-66.00293866311488, km:18.5, link:"https://www.google.com/maps/place/Piscicultura+de+La+Florida"},
+  {nombre:"Reserva floro faunística La Florida", lat:-33.08998484163233, lng:-66.02903002527822, km:null, link:"https://www.google.com/maps/place/Reserva+La+Florida"},
+  {nombre:"Comisaría de El Trapiche", lat:-33.13083552526552, lng:-66.06246535182365, km:12.6, link:""},
+  {nombre:"Hospital Rene Favaloro", lat:-33.12384105141295, lng:-66.0540698442421, km:12.2, link:""},
+  {nombre:"Ciudad de San Luis", lat:-33.29237981366207, lng:-66.33624624726625, km:51, link:""},
+  {nombre:"Potrero de los Funes - Parroquia San Antonio", lat:-33.21333341332995, lng:-66.22247551383757, km:49, link:""}
+];
+
+// Control de rutas
+let controlRuta = null;
+
+// Crear marcadores
+puntos.forEach(p => {
+    const marker = L.marker([p.lat, p.lng]).addTo(map);
+
+    let popup = `<b>${p.nombre}</b>`;
+    if (p.km !== null && p.km !== undefined) popup += `<br>Distancia: ${p.km} km`;
+    if (p.link) popup += `<br><a href="${p.link}" target="_blank">Ver más</a>`;
+
+    marker.bindPopup(popup);
+
+    marker.on('click', () => {
+        if (controlRuta) map.removeControl(controlRuta);
+
+        controlRuta = L.Routing.control({
+            waypoints: [
+                L.latLng(camping.lat, camping.lng),
+                L.latLng(p.lat, p.lng)
+            ],
+            routeWhileDragging: false,
+            show: false,
+            addWaypoints: false
+        }).addTo(map);
+    });
+});
+</script>
+
+</body>
+</html>
